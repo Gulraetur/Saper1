@@ -7,7 +7,44 @@ MINES_NUM = 10 # Количество мин на поле
  
 mines = set(random.sample(range(1, GRID_SIZE**2+1), MINES_NUM))  # Генерируем мины в случайных позициях
 clicked = set()  # Создаем сет для клеточек, по которым мы кликнули
- 
+
+def generate_neighbors(square):
+    # Возвращает клетки соседствующие с square 
+    # Левая верхняя клетка
+    if square == 1:
+        data = {GRID_SIZE + 1, 2, GRID_SIZE + 2}
+    # Правая нижняя 
+    elif square == GRID_SIZE ** 2:
+        data = {square - GRID_SIZE, square - 1, square - GRID_SIZE - 1}
+    # Левая нижняя
+    elif square == GRID_SIZE:
+        data = {GRID_SIZE - 1, GRID_SIZE * 2, GRID_SIZE * 2 - 1}
+    # Верхняя правая
+    elif square == GRID_SIZE ** 2 - GRID_SIZE + 1:
+        data = {square + 1, square - GRID_SIZE, square - GRID_SIZE + 1}
+    # Клетка в левом ряду
+    elif square < GRID_SIZE:
+        data = {square + 1, square - 1, square + GRID_SIZE,
+                square + GRID_SIZE - 1, square + GRID_SIZE + 1}
+    # Клетка в правом ряду
+    elif square > GRID_SIZE ** 2 - GRID_SIZE:
+        data = {square + 1, square - 1, square - GRID_SIZE,
+                square - GRID_SIZE - 1, square - GRID_SIZE + 1}
+    # Клетка в нижнем ряду
+    elif square % GRID_SIZE == 0:
+        data = {square + GRID_SIZE, square - GRID_SIZE, square - 1,
+                square + GRID_SIZE - 1, square - GRID_SIZE - 1}
+    # Клетка в верхнем ряду
+    elif square % GRID_SIZE == 1:
+        data = {square + GRID_SIZE, square - GRID_SIZE, square + 1,
+                square + GRID_SIZE + 1, square - GRID_SIZE + 1}
+    # Любая другая клетка
+    else:
+        data = {square - 1, square + 1, square - GRID_SIZE, square + GRID_SIZE,
+                square - GRID_SIZE - 1, square - GRID_SIZE + 1,
+                square + GRID_SIZE + 1, square + GRID_SIZE - 1}
+    return data
+
 # Функция реагирования на клик
 def click(event):
     ids = c.find_withtag(CURRENT)[0]  # Определяем по какой клетке кликнули
