@@ -8,8 +8,12 @@ MINES_NUM = 10 # Количество мин на поле
 mines = set(random.sample(range(1, GRID_SIZE**2+1), MINES_NUM))  # Генерируем мины в случайных позициях
 clicked = set()  # Создаем сет для клеточек, по которым мы кликнули
 
+def check_mines(neighbors):
+        # Возвращаем длинну пересечения мин и соседних клеток
+    return len(mines.intersection(neighbors))
+
 def generate_neighbors(square):
-    # Возвращает клетки соседствующие с square 
+    """ Возвращает клетки соседствующие с square """
     # Левая верхняя клетка
     if square == 1:
         data = {GRID_SIZE + 1, 2, GRID_SIZE + 2}
@@ -45,12 +49,65 @@ def generate_neighbors(square):
                 square + GRID_SIZE + 1, square + GRID_SIZE - 1}
     return data
 
+def clearance(ids):
+    """ Итеративная (эффективная) функция очистки поля """
+    clicked.add(ids) # добавляем нажатую клетку в сет нажатых
+    ids_neigh = generate_neighbors(ids) # Получаем все соседние клетки
+    around = check_mines(ids_neigh) # высчитываем количество мин вокруг нажатой клетки
+    c.itemconfig(ids, fill="green") # окрашиваем клетку в зеленый
+
+    # Если вокруг мин нету
+    if around == 0:
+        # Создаем список соседних клеток
+        neigh_list = list(ids_neigh)
+        # Пока в списке соседей есть клетки
+        while len(neigh_list) > 0:
+            # Получаем клетку
+            item = neigh_list.pop()
+            # Окрашиваем ее в зеленый цвет
+            c.itemconfig(item, fill="green")
+            # Получаем соседение клетки данной клетки
+            item_neigh = generate_neighbors(item)
+            # Получаем количество мин в соседних клетках
+            item_around = check_mines(item_neigh)
+            # Если в соседних клетках есть мины
+            if item_around > 0:
+                # Делаем эту проверку, чтобы писать по нескольку раз на той же клетке
+                if item not in clicked:
+                    # Получаем координаты этой клетки
+                    x1, y1, x2, y2 = c.coords(item)
+                    # Пишем на клетке количество мин вокруг
+                    c.create_text(x1 + SQUARE_SIZE / 2,
+                                  y1 + SQUARE_SIZE / 2,
+                                  text=str(item_around),
+                                  font="Arial {}".format(int(SQUARE_SIZE / 2)),
+                                  fill='yellow')
+            # Если в соседних клетках мин нету
+            else:
+                # Добавляем соседние клетки данной клетки в общий список
+                neigh_list.extend(set(item_neigh).difference(clicked))
+                # Убираем повторяющиеся элементы из общего списка
+                neigh_list = list(set(neigh_list))
+            # Добавляем клетку в нажатые
+            clicked.add(item)
+    # Если мины вокруг есть
+    else:
+        # Высчитываем координаты клетки
+        x1, y1, x2, y2 = c.coords(ids)
+        # Пишем количество мин вокруг
+        c.create_text(x1 + SQUARE_SIZE / 2,
+                      y1 + SQUARE_SIZE / 2,
+                      text=str(around),
+                      font="Arial {}".format(int(SQUARE_SIZE / 2)),
+                      fill='yellow')
+                      
 # Функция реагирования на клик
 def click(event):
     ids = c.find_withtag(CURRENT)[0]  # Определяем по какой клетке кликнули
     if ids in mines:
         c.itemconfig(CURRENT, fill="red") # Если кликнули по клетке с миной - красим ее в красный цвет
     elif ids not in clicked:
+        clearance(ids)
         c.itemconfig(CURRENT, fill="green") # Иначе красим в зеленый
     c.update()
  
