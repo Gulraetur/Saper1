@@ -32,6 +32,8 @@ def mark_mine(event):
 root = Tk() # Основное окно программы
 root.title("Pythonicway Minesweep")
 c = Canvas(root, width=GRID_SIZE * SQUARE_SIZE, height=GRID_SIZE * SQUARE_SIZE) # Задаем область на которой будем рисовать
+c.bind("<Button-1>", click)
+c.bind("<Button-3>", mark_mine)
 c.pack()
  
 # Следующий код отрисует решетку из клеточек серого цвета на игровом поле
@@ -40,5 +42,6 @@ for i in range(GRID_SIZE):
         c.create_rectangle(i * SQUARE_SIZE, j * SQUARE_SIZE,
                            i * SQUARE_SIZE + SQUARE_SIZE,
                            j * SQUARE_SIZE + SQUARE_SIZE, fill='gray')
+
  
 root.mainloop() # Запускаем программу
